@@ -92,8 +92,10 @@ OTHER_FILES += \
     nesca_3.rc
 
 
-unix|win32: LIBS += -lssh
-
-unix|win32: LIBS += -lcrypto
-
-unix|win32: LIBS += -lcurl
+# --- libssh + openssl from vcpkg (Windows MinGW) ---
+win32 {
+    VCPKG_ROOT = C:/vcpkg/installed/x64-mingw-dynamic
+    INCLUDEPATH += $$VCPKG_ROOT/include
+    LIBS += -L$$VCPKG_ROOT/lib -lssh -lcrypto -lssl
+}
+# --- end vcpkg ---
