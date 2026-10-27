@@ -1,23 +1,45 @@
-name: Build Nesca
-on: [push, workflow_dispatch]
+name: Build Nesca (Windows)
+
+on:
+  push:
+  workflow_dispatch:
+
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: windows-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Install deps
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.2'
+          arch: 'win64_mingw81'
+          tools: 'mingw81_64'
+          cache: true
+
+      - name: Install libssh (via vcpkg)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y qtmultimedia5-dev libqt5multimediawidgets5 \
-            libqt5multimedia5-plugins libqt5multimedia5 libssh-dev libssl-dev qtbase5-dev
-      - name: Build
+          vcpkg install libssh:x64-mingw-static
+        shell: cmd
+
+      - name: Configure (qmake)
         run: |
-          qmake nesca.pro || qmake nesca_3.pro || qmake
-          make -j4
+          qmake nesca.pro
+        shell: cmd
+
+      - name: Build (mingw32-make)
+        run: |
+          mingw32-make -j4
+        shell: cmd
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nesca-build
+          name: nesca-windows
           path: |
-            nesca
-            nesca_3
+            release/*.exe
+            *.exe
+          if-no-files-found: warn
