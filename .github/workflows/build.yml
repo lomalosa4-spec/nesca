@@ -17,12 +17,16 @@ jobs:
         with:
           version: '5.15.2'
           arch: 'win64_mingw81'
-          tools: 'mingw81_64'
           cache: true
 
-      - name: Install libssh (via vcpkg)
+      - name: Setup vcpkg (built-in)
         run: |
-          vcpkg install libssh:x64-mingw-static
+          echo "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Install libssh via vcpkg
+        run: |
+          vcpkg install libssh:x64-mingw-dynamic
         shell: cmd
 
       - name: Configure (qmake)
